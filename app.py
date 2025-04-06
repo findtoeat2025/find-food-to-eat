@@ -7,10 +7,14 @@ import json
 from geopy.distance import geodesic
 import sqlite3
 import platform
+import pytz
 
 load_dotenv()
 
 app = Flask(__name__)
+
+# Set timezone to Thailand (UTC+7)
+thailand_tz = pytz.timezone('Asia/Bangkok')
 
 # Database setup
 def init_db():
@@ -36,12 +40,15 @@ init_db()
 def get_db_connection():
     return sqlite3.connect('user_log/user_data.db')
 
+def get_current_time():
+    return datetime.now(thailand_tz).isoformat()
+
 def is_duplicate_visit(user_agent, lat, lng, time_window_minutes=5):
     conn = sqlite3.connect('user_log/user_data.db')
     c = conn.cursor()
     
-    # Calculate time threshold
-    time_threshold = (datetime.now() - timedelta(minutes=time_window_minutes)).isoformat()
+    # Calculate time threshold using Thailand timezone
+    time_threshold = (datetime.now(thailand_tz) - timedelta(minutes=time_window_minutes)).isoformat()
     
     # Check for similar visits within time window
     c.execute('''SELECT COUNT(*) FROM user_logs 
@@ -64,7 +71,7 @@ def log_user_data(user_agent, latitude, longitude, address):
         cursor.execute('''
             INSERT INTO user_logs (timestamp, user_agent, latitude, longitude, address)
             VALUES (?, ?, ?, ?, ?)
-        ''', (datetime.now().isoformat(), user_agent, latitude, longitude, address))
+        ''', (get_current_time(), user_agent, latitude, longitude, address))
         
         conn.commit()
         conn.close()
