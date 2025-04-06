@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ค้นหาร้านอาหารใกล้คุณ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #e3f2fd;
+            --secondary-color: #ffffff;
+            --accent-color: #2196f3;
+            --text-color: #333333;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Kanit', sans-serif;
+        }
+        
+        body {
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 20px;
+            background-color: var(--secondary-color);
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px var(--shadow-color);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #2196f3, #64b5f6, #2196f3);
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--accent-color);
+        }
+        
+        header p {
+            font-size: 1.2em;
+            color: #666;
+        }
+        
+        .restaurant-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+            padding: 20px;
+        }
+        
+        .restaurant-card {
+            background-color: var(--secondary-color);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px var(--shadow-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .restaurant-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px var(--shadow-color);
+        }
+        
+        .restaurant-image {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            transition: transform 0.3s ease;
+            flex-shrink: 0;
+        }
+        
+        .restaurant-card:hover .restaurant-image {
+            transform: scale(1.05);
+        }
+        
+        .restaurant-info {
+            margin-bottom: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .restaurant-name {
+            font-size: 1.4em;
+            font-weight: 500;
+            margin-bottom: 10px;
+            color: var(--accent-color);
+            line-height: 1.3;
+            min-height: 2.8em;
+        }
+        
+        .restaurant-rating {
+            color: #ffc107;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .restaurant-address {
+            font-size: 1em;
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 15px;
+            flex-grow: 1;
+        }
+        
+        .navigation-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: auto;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .navigation-btn:hover {
+            background-color: #1976d2;
+            transform: translateY(-2px);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 30px;
+            display: none;
+        }
+        
+        .loading i {
+            font-size: 2em;
+            color: var(--accent-color);
+            margin-bottom: 10px;
+        }
+        
+        .error-message {
+            color: #f44336;
+            text-align: center;
+            padding: 30px;
+            display: none;
+            background-color: #ffebee;
+            border-radius: 10px;
+            margin: 20px;
+        }
+        
+        .error-message i {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            header h1 {
+                font-size: 2em;
+            }
+            
+            .restaurant-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-utensils"></i> ค้นหาร้านอาหารใกล้คุณ</h1>
+            <p>ค้นหาร้านอาหารอร่อยใกล้ตำแหน่งของคุณ</p>
+        </header>
+        
+        <div class="loading">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>กำลังค้นหาร้านอาหาร...</p>
+        </div>
+        
+        <div class="error-message">
+            <i class="fas fa-exclamation-circle"></i>
+            <p>ไม่สามารถค้นหาร้านอาหารได้ กรุณาลองใหม่อีกครั้ง</p>
+        </div>
+        
+        <div class="restaurant-list" id="restaurantList">
+            <!-- Restaurant cards will be inserted here -->
+        </div>
+    </div>
+
+    <script>
+        let userLocation = null;
+        
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition, showError);
+            } else {
+                showError({ message: "เบราว์เซอร์ของคุณไม่รองรับการระบุตำแหน่ง" });
+            }
+        }
+        
+        function showPosition(position) {
+            userLocation = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude
+            };
+            fetchRestaurants();
+        }
+        
+        function showError(error) {
+            const errorDiv = document.querySelector('.error-message');
+            errorDiv.style.display = 'block';
+            errorDiv.querySelector('p').textContent = error.message;
+        }
+        
+        function fetchRestaurants() {
+            document.querySelector('.loading').style.display = 'block';
+            document.querySelector('.error-message').style.display = 'none';
+            
+            fetch('/get_restaurants', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(userLocation)
+            })
+            .then(response => response.json())
+            .then(data => {
+                displayRestaurants(data.restaurants);
+                document.querySelector('.loading').style.display = 'none';
+            })
+            .catch(error => {
+                document.querySelector('.loading').style.display = 'none';
+                showError({ message: "เกิดข้อผิดพลาดในการค้นหาร้านอาหาร" });
+            });
+        }
+        
+        function displayRestaurants(restaurants) {
+            const restaurantList = document.getElementById('restaurantList');
+            restaurantList.innerHTML = '';
+            
+            restaurants.forEach(restaurant => {
+                const card = document.createElement('div');
+                card.className = 'restaurant-card';
+                
+                const imageUrl = restaurant.photos ? 
+                    `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${restaurant.photos}&key=${'AIzaSyBUhmivsASFvGQRSp91cOMOKZu0HCRfzx4'}` : 
+                    'https://via.placeholder.com/400x200?text=No+Image';
+                
+                card.innerHTML = `
+                    <img src="${imageUrl}" alt="${restaurant.name}" class="restaurant-image">
+                    <div class="restaurant-info">
+                        <h3 class="restaurant-name">${restaurant.name}</h3>
+                        <div class="restaurant-rating">
+                            ${'★'.repeat(Math.round(restaurant.rating))}${'☆'.repeat(5-Math.round(restaurant.rating))}
+                            (${restaurant.rating})
+                        </div>
+                        <p class="restaurant-address">${restaurant.vicinity}</p>
+                    </div>
+                    <button class="navigation-btn" onclick="navigateToRestaurant(${restaurant.lat}, ${restaurant.lng})">
+                        <i class="fas fa-directions"></i> นำทาง
+                    </button>
+                `;
+                
+                restaurantList.appendChild(card);
+            });
+        }
+        
+        function navigateToRestaurant(lat, lng) {
+            if (userLocation) {
+                const url = `https://www.google.com/maps/dir/?api=1&origin=${userLocation.lat},${userLocation.lng}&destination=${lat},${lng}&travelmode=driving`;
+                window.open(url, '_blank');
+            }
+        }
+        
+        // Initialize the application
+        getLocation();
+    </script>
+</body>
+</html> 
