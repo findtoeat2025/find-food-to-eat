@@ -1,11 +1,15 @@
 services:
   - type: web
     name: find-food-to-eat
-    env: python
+    runtime: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
     envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.12
       - key: GOOGLE_API_KEY
         sync: false
+      - key: PORT
+        value: 10000
     healthCheckPath: /
     autoDeploy: true 

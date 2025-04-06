@@ -14,20 +14,27 @@ app = Flask(__name__)
 
 # Database setup
 def init_db():
-    conn = sqlite3.connect('user_log/user_data.db')
-    c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS user_logs
-                 (id INTEGER PRIMARY KEY AUTOINCREMENT,
-                  timestamp TEXT,
-                  user_agent TEXT,
-                  latitude REAL,
-                  longitude REAL,
-                  address TEXT,
-                  is_duplicate INTEGER DEFAULT 0)''')
-    conn.commit()
-    conn.close()
+    try:
+        os.makedirs('user_log', exist_ok=True)
+        conn = sqlite3.connect('user_log/user_data.db')
+        c = conn.cursor()
+        c.execute('''CREATE TABLE IF NOT EXISTS user_logs
+                    (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    timestamp TEXT,
+                    user_agent TEXT,
+                    latitude REAL,
+                    longitude REAL,
+                    address TEXT,
+                    is_duplicate INTEGER DEFAULT 0)''')
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"Database initialization error: {str(e)}")
 
 init_db()
+
+def get_db_connection():
+    return sqlite3.connect('user_log/user_data.db')
 
 def is_duplicate_visit(user_agent, lat, lng, time_window_minutes=5):
     conn = sqlite3.connect('user_log/user_data.db')
@@ -164,4 +171,5 @@ def get_computer_name():
     })
 
 if __name__ == '__main__':
-    app.run(debug=True) 
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port) 
